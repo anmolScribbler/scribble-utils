@@ -77,18 +77,20 @@ assign_role() {
   echo "Checking if the role already exists..."
   loading_icon 60 "Waiting 60 sec for azure to reflect the role definitions"
   # Check if the role already exists
-  existing_role=$(az role definition list --query "[?roleName=='Disk, snapshots manager for the scribble resource group'].name" -o tsv)
+  role_name="Disk, snapshots manager for the  resource group $RESOURCE_GROUP"
+  echo "Role name: $role_name"
+  existing_role=$(az role definition list --query "[?roleName=='$role_name'].name" -o tsv)
 
   if [[ -n $existing_role ]]; then
     role_disk_manager=$existing_role
-    echo "Role (Disk, snapshots manager for the scribble resource group) already exists. Skipping role creation."
+    echo "Role ($role_name) already exists. Skipping role creation."
     echo "Matching role: $role_disk_manager"
     az role definition list --query "[?name=='$role_disk_manager']" --output json
     echo
   else
     echo "Creating role (Disk, snapshots manager for the scribble resource group)"
     role_disk_manager=$(az role definition create --query "name" --output tsv --role-definition '{
-      "Name": "Disk, snapshots manager for the scribble resource group",
+      "Name": "$role_name",
       "Description": "Create, delete disks and snapshots",
       "Actions": [
         "Microsoft.Compute/disks/read",

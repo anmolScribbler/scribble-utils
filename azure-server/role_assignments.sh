@@ -77,7 +77,7 @@ assign_role() {
   echo "Checking if the role already exists..."
   loading_icon 60 "Waiting 60 sec for azure to reflect the role definitions"
   # Check if the role already exists
-  role_name="Disk, snapshots manager for the  resource group $RESOURCE_GROUP"
+  role_name="Disk and snapshots manager for the  resource group $RESOURCE_GROUP"
   echo "Role name: $role_name"
   existing_role=$(az role definition list --query "[?roleName=='$role_name'].name" -o tsv)
 
@@ -90,7 +90,7 @@ assign_role() {
   else
     echo "Creating role (Disk, snapshots manager for the scribble resource group)"
     role_disk_manager=$(az role definition create --query "name" --output tsv --role-definition '{
-      "Name": "$role_name",
+      "Name": "'"${role_name}"'",
       "Description": "Create, delete disks and snapshots",
       "Actions": [
         "Microsoft.Compute/disks/read",
@@ -105,7 +105,7 @@ assign_role() {
         "Microsoft.Network/networkInterfaces/join/action",
         "Microsoft.Resources/subscriptions/resourcegroups/read"
       ],
-      "AssignableScopes": ["/subscriptions/'$SUBSCRIPTION_ID'/resourceGroups/'$RESOURCE_GROUP'"]
+      "AssignableScopes": ["/subscriptions/'"$SUBSCRIPTION_ID"'/resourceGroups/'"$RESOURCE_GROUP"'"]
     }')
     echo "Role created with name: $role_disk_manager"
     wait_and_list_role $role_disk_manager

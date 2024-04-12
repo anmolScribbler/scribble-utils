@@ -77,7 +77,6 @@ assign_role() {
   echo "Checking if the role already exists..."
   loading_icon 60 "Waiting 60 sec for azure to reflect the role definitions"
   # Check if the role already exists
-  role_name="Disk and snapshots manager for the  resource group $RESOURCE_GROUP"
   echo "Role name: $role_name"
   existing_role=$(az role definition list --query "[?roleName=='$role_name'].name" -o tsv)
 
@@ -163,11 +162,11 @@ remove_role() {
   echo "Removing an existing role..."
   loading_icon 60 "Waiting 60 sec for azure to reflect the role definitions"
   # Check if the role already exists
-  existing_role=$(az role definition list --query "[?roleName=='Disk, snapshots manager for the scribble resource group'].name" -o tsv)
+  existing_role=$(az role definition list --query "[?roleName=='$role_name'].name" -o tsv)
 
   if [[ -n $existing_role ]]; then
     role_disk_manager=$existing_role
-    echo "Role (Disk, snapshots manager for the scribble resource group) found."
+    echo "Role ($role_name) found."
 
     # Display role definition JSON
     echo "Role Definition JSON:"
@@ -189,7 +188,7 @@ remove_role() {
           read -p "Are you sure you want to delete this role assignment? (yes/no): " answer_role_assignment
 
           if [[ $answer_role_assignment == "yes" ]]; then
-              echo "Deleting role assignment for the role (Disk, snapshots manager for the scribble resource group)"
+              echo "Deleting role assignment for the role ($role_name)"
               az role assignment delete --role "$role_disk_manager" --assignee "$APPLICATION_CLIENT_ID" --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP"
               wait_till_role_assignment_removed $role_disk_manager $role_assignment
           else
@@ -198,7 +197,7 @@ remove_role() {
       else
           echo "Role assignment does not exist. No action needed."
       fi
-      echo "Now removing the role (Disk, snapshots manager for the scribble resource group)"
+      echo "Now removing the role ($role_name)"
       az role definition delete --name "$role_disk_manager"
       wait_till_role_removed $role_disk_manager
     else
@@ -210,6 +209,7 @@ remove_role() {
 }
 
 
+role_name="Disk and snapshots manager for the  resource group $RESOURCE_GROUP"
 
 # Parse command-line arguments
 while [[ $# -gt 0 ]]; do
